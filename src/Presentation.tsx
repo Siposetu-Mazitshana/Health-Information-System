@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Home, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, Download, FileDown } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import pptxgen from 'pptxgenjs';
 
 interface PresentationProps {
   onBack: () => void;
@@ -247,6 +248,290 @@ export default function Presentation({ onBack }: PresentationProps) {
     }
   };
 
+  const downloadPowerPoint = async () => {
+    const pptx = new pptxgen();
+    pptx.layout = 'LAYOUT_WIDE';
+    pptx.author = 'Okuhle Gebashe';
+    pptx.title = 'Healthcare Information Systems Reference Architecture';
+
+    slides.forEach((slide) => {
+      const pptSlide = pptx.addSlide();
+      pptSlide.background = { color: '1F2937' };
+
+      if (slide.type === 'title') {
+        pptSlide.addText(slide.title, {
+          x: 0.5,
+          y: 2.0,
+          w: 9,
+          h: 2,
+          fontSize: 44,
+          bold: true,
+          color: 'FFFFFF',
+          align: 'center',
+          valign: 'middle'
+        });
+        pptSlide.addText(slide.author, {
+          x: 0.5,
+          y: 4.5,
+          w: 9,
+          h: 0.5,
+          fontSize: 24,
+          color: 'FFFFFF',
+          align: 'center'
+        });
+        pptSlide.addText(slide.institution, {
+          x: 0.5,
+          y: 5.0,
+          w: 9,
+          h: 0.5,
+          fontSize: 20,
+          color: 'CCCCCC',
+          align: 'center'
+        });
+      }
+
+      if (slide.type === 'content') {
+        pptSlide.addText(slide.title, {
+          x: 0.5,
+          y: 0.5,
+          w: 9,
+          h: 0.8,
+          fontSize: 36,
+          bold: true,
+          color: '3B82F6',
+          align: 'center'
+        });
+
+        let yPos = 1.5;
+        slide.content.forEach((item) => {
+          pptSlide.addText(item.heading, {
+            x: 0.7,
+            y: yPos,
+            w: 8.6,
+            h: 0.5,
+            fontSize: 20,
+            bold: true,
+            color: '60A5FA'
+          });
+          pptSlide.addText(item.text, {
+            x: 0.7,
+            y: yPos + 0.5,
+            w: 8.6,
+            h: 0.8,
+            fontSize: 16,
+            color: 'FFFFFF'
+          });
+          yPos += 1.5;
+        });
+      }
+
+      if (slide.type === 'architecture') {
+        pptSlide.addText(slide.title, {
+          x: 0.5,
+          y: 0.5,
+          w: 9,
+          h: 0.8,
+          fontSize: 36,
+          bold: true,
+          color: '3B82F6',
+          align: 'center'
+        });
+
+        let yPos = 1.5;
+        slide.layers.forEach((layer) => {
+          const colorMap: { [key: string]: string } = {
+            'from-blue-500 to-blue-600': '3B82F6',
+            'from-green-500 to-green-600': '10B981',
+            'from-yellow-500 to-yellow-600': 'F59E0B',
+            'from-orange-500 to-orange-600': 'F97316',
+            'from-red-500 to-red-600': 'EF4444'
+          };
+          pptSlide.addText([
+            { text: layer.name + '\n', options: { fontSize: 20, bold: true, color: 'FFFFFF', breakLine: true } },
+            { text: layer.desc, options: { fontSize: 16, color: 'FFFFFF' } }
+          ], {
+            x: 0.7,
+            y: yPos,
+            w: 8.6,
+            h: 0.8,
+            fill: { color: colorMap[layer.color] || '3B82F6' }
+          });
+          yPos += 1.0;
+        });
+      }
+
+      if (slide.type === 'diagram') {
+        pptSlide.addText(slide.title, {
+          x: 0.5,
+          y: 0.5,
+          w: 9,
+          h: 0.8,
+          fontSize: 36,
+          bold: true,
+          color: '3B82F6',
+          align: 'center'
+        });
+
+        pptSlide.addText('Healthcare Providers & Patients', {
+          x: 3.5,
+          y: 1.5,
+          w: 3,
+          h: 0.5,
+          fontSize: 16,
+          bold: true,
+          color: 'FFFFFF',
+          align: 'center',
+          fill: { color: '2563EB' }
+        });
+
+        pptSlide.addText('Web Portal | Mobile App | Admin Dashboard', {
+          x: 1.0,
+          y: 2.2,
+          w: 8,
+          h: 0.5,
+          fontSize: 14,
+          color: 'FFFFFF',
+          align: 'center',
+          fill: { color: '3B82F6' }
+        });
+
+        pptSlide.addText('Electronic Health Records | Appointment Management', {
+          x: 1.0,
+          y: 2.9,
+          w: 8,
+          h: 0.5,
+          fontSize: 14,
+          color: 'FFFFFF',
+          align: 'center',
+          fill: { color: '10B981' }
+        });
+
+        pptSlide.addText('Integration & Interoperability Layer\nHL7 FHIR API | REST Services | Message Queue', {
+          x: 1.0,
+          y: 3.6,
+          w: 8,
+          h: 0.7,
+          fontSize: 14,
+          color: 'FFFFFF',
+          align: 'center',
+          fill: { color: 'F59E0B' }
+        });
+
+        pptSlide.addText('Patient Database | Clinical Data | Analytics Store', {
+          x: 1.0,
+          y: 4.5,
+          w: 8,
+          h: 0.5,
+          fontSize: 14,
+          color: 'FFFFFF',
+          align: 'center',
+          fill: { color: 'F97316' }
+        });
+
+        pptSlide.addText('Infrastructure Layer\nHybrid Cloud | Security | Monitoring | Backup', {
+          x: 1.0,
+          y: 5.2,
+          w: 8,
+          h: 0.7,
+          fontSize: 14,
+          color: 'FFFFFF',
+          align: 'center',
+          fill: { color: 'EF4444' }
+        });
+      }
+
+      if (slide.type === 'features') {
+        pptSlide.addText(slide.title, {
+          x: 0.5,
+          y: 0.5,
+          w: 9,
+          h: 0.8,
+          fontSize: 36,
+          bold: true,
+          color: '3B82F6',
+          align: 'center'
+        });
+
+        const rows = [];
+        for (let i = 0; i < slide.features.length; i += 2) {
+          rows.push(slide.features.slice(i, i + 2));
+        }
+
+        let yPos = 1.5;
+        rows.forEach((row) => {
+          row.forEach((feature, idx) => {
+            const xPos = idx === 0 ? 0.7 : 5.2;
+            pptSlide.addText([
+              { text: feature.title + '\n', options: { fontSize: 18, bold: true, color: '60A5FA', breakLine: true } },
+              { text: feature.desc, options: { fontSize: 14, color: 'FFFFFF' } }
+            ], {
+              x: xPos,
+              y: yPos,
+              w: 4.1,
+              h: 1.2,
+              fill: { color: '1E293B' }
+            });
+          });
+          yPos += 1.4;
+        });
+      }
+
+      if (slide.type === 'conclusion') {
+        pptSlide.addText(slide.title, {
+          x: 0.5,
+          y: 0.5,
+          w: 9,
+          h: 0.8,
+          fontSize: 36,
+          bold: true,
+          color: '3B82F6',
+          align: 'center'
+        });
+
+        let yPos = 1.5;
+        slide.points.forEach((point) => {
+          pptSlide.addText('✓ ' + point, {
+            x: 0.7,
+            y: yPos,
+            w: 8.6,
+            h: 0.6,
+            fontSize: 16,
+            color: 'FFFFFF'
+          });
+          yPos += 0.8;
+        });
+      }
+
+      if (slide.type === 'references') {
+        pptSlide.addText(slide.title, {
+          x: 0.5,
+          y: 0.5,
+          w: 9,
+          h: 0.8,
+          fontSize: 36,
+          bold: true,
+          color: '3B82F6',
+          align: 'center'
+        });
+
+        let yPos = 1.5;
+        slide.references.forEach((ref, idx) => {
+          pptSlide.addText(`[${idx + 1}] ${ref}`, {
+            x: 0.7,
+            y: yPos,
+            w: 8.6,
+            h: 0.7,
+            fontSize: 12,
+            color: 'FFFFFF'
+          });
+          yPos += 0.8;
+        });
+      }
+    });
+
+    pptx.writeFile({ fileName: 'Healthcare-Information-Systems-Presentation.pptx' });
+  };
+
   const slide = slides[currentSlide];
 
   return (
@@ -462,6 +747,13 @@ export default function Presentation({ onBack }: PresentationProps) {
             >
               <Home size={20} />
               <span>Back to Poster</span>
+            </button>
+            <button
+              onClick={downloadPowerPoint}
+              className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+            >
+              <FileDown size={20} />
+              <span>Download PowerPoint</span>
             </button>
             <button
               id="presentation-download-btn"
